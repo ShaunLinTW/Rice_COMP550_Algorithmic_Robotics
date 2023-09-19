@@ -1,0 +1,172 @@
+robot:
+  - name: "l1"
+    joint: "fixed"
+    parent: "root"
+    tip: [0, 0, 1.57]
+    geometry:
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [0, 0, 0]
+
+
+  - name: "link_1"
+    joint: "continuous"
+    parent: "l1"
+    tip: [2.5, 0, 0]
+    allowed: ["l1"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-1, 0.5]
+          - [-1, -0.5]
+          - [3, -0.4]
+          - [3, 0.4]
+        offset: [-2.5, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+
+  - name: "link_2"
+    joint: "continuous"
+    parent: "link_1"
+    tip: [2.5, 0, 0]
+    allowed: ["link_1"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-0.5, 0.4]
+          - [-0.5, -0.4]
+          - [3, -0.25]
+          - [3, 0.25]
+        offset: [-2.5, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [-2.5, 0, 0]
+
+
+  - name: "link_3"
+    joint: "continuous"
+    parent: "link_2"
+    tip: [2.5, 0, 0]
+    allowed: ["link_2"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-0.4, 0.25]
+          - [-0.4, -0.25]
+          - [3, -0.2]
+          - [3, 0.2]
+        offset: [-2.5, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [-2.5, 0, 0]
+
+  - name: "link_4"
+    joint: "continuous"
+    parent: "link_3"
+    tip: [2.5, 0, 0]
+    allowed: ["link_3"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-0.3, 0.2]
+          - [-0.3, -0.2]
+          - [3, -0.1]
+          - [3, 0.1]
+        offset: [-2.5, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [-2.5, 0, 0]
+        
+  - name: "link_5"
+    joint: "continuous"
+    parent: "link_4"
+    tip: [2.5, 0, 0]
+    allowed: ["link_4"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-0.2, 0.15]
+          - [-0.2, -0.15]
+          - [3, -0.1]
+          - [3, 0.1]
+        offset: [-2.5, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [-2.5, 0, 0]
+
+  - name: "obstacle_1"
+    geometry:
+      - type: "circle"
+        dimensions: [2]
+        offset: [3, 2, 0]
+        color: [0, 0., 0., 1]
+
+  - name: "obstacle_2"
+    geometry:
+      - type: "convex"
+        points:
+          - [0.0, 0.0]
+          - [3, 0.0]
+          - [1.5, 4]
+        offset: [-5.5, 0, 0]
+        color: [0., 0., 0.3, 1]
+
+  - name: "obstacle_3"
+    geometry:
+      - type: "circle"
+        dimensions: [3]
+        offset: [-4.5, 9, 3.14]
+        color: [0., 0.2, 0., 1]
+
+  - name: "obstacle_4"
+    geometry:
+      - type: "convex"
+        points:
+          - [0.0, 0.0]
+          - [3, 0.0]
+          - [1.5, 4]
+        offset: [4, 8, 2.94]
+        color: [0.7, 0., 0, 1]
+
+  - name: "obstacle_5"
+    tip: [-6, 4, -1]
+    geometry:
+      - type: "box"
+        dimensions: [0.5, 0.5]
+        color: [0.5, 0.2, 0.2, 1]
+
+
+states:
+  - name: "start"
+    configuration:
+    - frame: "link_1"
+      value: [0]
+    - frame: "link_2"
+      value: [0]
+    - frame: "link_3"
+      value: [0]
+    - frame: "link_4"
+      value: [0]
+    - frame: "link_5"
+      value: [0]
+
+  - name: "goal"
+    configuration:
+    - frame: "link_1"
+      value: [0.754]
+    - frame: "link_2"
+      value: [-0.565]
+    - frame: "link_3"
+      value: [1.131]
+    - frame: "link_4"
+      value: [-0.188] 
+    - frame: "link_5"
+      value: [-0.565] 

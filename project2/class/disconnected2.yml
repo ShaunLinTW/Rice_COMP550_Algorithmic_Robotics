@@ -1,0 +1,44 @@
+robot:
+  - name: "base"
+    joint: "fixed"
+    parent: "root"
+    tip: [0, 0, 0]
+    geometry:
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [0, 0, 0]
+
+  - name: "link_1"
+    joint: "continuous"
+    parent: "base"
+    tip: [0, 2.5, 0]
+    allowed: ["base"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-3, 0.5]
+          - [-3, -0.5]
+          - [5, -0.5]
+          - [5, 0.5]
+        offset: [0, -2.5, 1.57]
+        color: [0.7, 0.3, 1.0, 1]
+
+  - name: "link_2"
+    joint: "continuous"
+    parent: "link_1"
+    tip: [0, 2.5, 0]
+    allowed: ["link_1"]
+    geometry:
+      - type: "convex"
+        points:
+          - [-3, 0.5]
+          - [-3, -0.5]
+          - [3, -0.5]
+          - [3, 0.5]
+        offset: [0, -2.5, 0]
+        color: [0.7, 0.3, 1.0, 1]
+      - type: "circle"
+        dimensions: [0.1]
+        color: [0.2, 0.2, 0.2, 1]
+        offset: [0, -2.5, 0]

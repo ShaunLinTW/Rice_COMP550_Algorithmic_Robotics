@@ -1,0 +1,51 @@
+robot:
+  - name: "l1"
+    joint: "flying"
+    limits:
+      upper: [ 5,  2]
+      lower: [-2, -2]
+    geometry:
+      - type: "box"
+        dimensions: [0.6, 0.2]
+
+  - name: "bbox"
+    geometry:
+      - type: "box"
+        dimensions: [2.1, 0.1]
+        offset: [0, 2.1, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [2.1, 0.1]
+        offset: [0, -2.1, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [0.1, 2.1]
+        offset: [-2.1, 0, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [0.1, 0.85]
+        offset: [2.1, 1.2, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [0.1, 0.85]
+        offset: [2.1, -1.2, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [1.6, 0.1]
+        offset: [0.5, 0.4, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [1.6, 0.1]
+        offset: [0.5, -0.4, 0]
+        color: [0.5, 0.2, 0.5, 1]
+
+states:
+  - name: "start"
+    configuration:
+    - frame: "l1"
+      value: [4, 0, 0]
+
+  - name: "goal"
+    configuration:
+    - frame: "l1"
+      value: [2, 0, 0]  

@@ -1,0 +1,89 @@
+robot:
+  - name: "l1"
+    joint: "flying"
+    limits:
+      upper: [ 10,  10]
+      lower: [-10, -10]
+    geometry:
+      - type: "box"
+        dimensions: [0.4, 0.1]
+
+  - name: "link_1"
+    joint: "continuous"
+    parent: "l1"
+    tip: [-0.8, 0, 0]
+    allowed: ["l1", "link_2"]
+    geometry:
+      - type: "convex"
+        points:
+          - [0, 0.1]
+          - [0, -0.1]
+          - [1.2, -0.1]
+          - [1.2, 0.1]
+        offset: [0, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+  
+  - name: "link_2"
+    joint: "continuous"
+    parent: "link_1"
+    tip: [-1.2, 0, 0]
+    allowed: ["link_1", "l1"]
+    geometry:
+      - type: "convex"
+        points:
+          - [0, 0.1]
+          - [0, -0.1]
+          - [1.2, -0.1]
+          - [1.2, 0.1]
+        offset: [0, 0, 0]
+        color: [0.7, 0.3, 1.0, 1]
+
+  - name: "bbox"
+    geometry:
+      - type: "box"
+        dimensions: [2.1, 0.1]
+        offset: [0, 2.1, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [2.1, 0.1]
+        offset: [0, -2.1, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [0.1, 2.1]
+        offset: [-2.1, 0, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [0.1, 1.2]
+        offset: [2.1, -0.8, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      - type: "box"
+        dimensions: [1.4, 0.1]
+        offset: [0.8, 0.3, 0]
+        color: [0.5, 0.2, 0.5, 1]
+      # - type: "box"
+      #   dimensions: [0.1, 2.1]
+      #   offset: [2.1, -0.4, 0]
+      #   color: [0.5, 0.2, 0.5, 1]
+      # - type: "box"
+      #   dimensions: [1.6, 0.1]
+      #   offset: [0.5, -1.2, 0.5]
+      #   color: [0.5, 0.2, 0.5, 1]
+
+states:
+  - name: "start"
+    configuration:
+    - frame: "l1"
+      value: [-0.2, -1.2, 2.7]
+    - frame: "link_1"
+      value: [2.827]
+    - frame: "link_2"
+      value: [1.885]
+
+  - name: "goal"
+    configuration:
+    - frame: "l1"
+      value: [1.8, 1, -1.257]
+    - frame: "link_1"
+      value: [-1.634]
+    - frame: "link_2"
+      value: [-0.628]  
