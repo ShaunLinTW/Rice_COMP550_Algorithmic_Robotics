@@ -28,15 +28,18 @@ ompl::geometric::RTP::~RTP()
 
 void ompl::geometric::RTP::clear()
 {
+    std::cout << "clear is called" << std::endl;
     Planner::clear();
     sampler_.reset();
     freeMemory();
+    RTPtree.clear();
     
     lastGoalMotion_ = nullptr;
 }
 
 void ompl::geometric::RTP::setup()
 {
+    std::cout << "setup is called" << std::endl;
     Planner::setup();
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
@@ -44,6 +47,7 @@ void ompl::geometric::RTP::setup()
 
 void ompl::geometric::RTP::freeMemory()
 {
+    std::cout << "clear memory" << std::endl;
     for (auto &motion : RTPtree)
     {
         if (motion->state != nullptr)
@@ -54,6 +58,8 @@ void ompl::geometric::RTP::freeMemory()
 
 ompl::base::PlannerStatus ompl::geometric::RTP::solve(const base::PlannerTerminationCondition &ptc)
 {
+    std::cout << "RTP solve is called" << std::endl;
+    clear();
     checkValidity();
     base::Goal *goal = pdef_->getGoal().get();
     auto *goal_s = dynamic_cast<base::GoalSampleableRegion *>(goal);
@@ -85,7 +91,7 @@ ompl::base::PlannerStatus ompl::geometric::RTP::solve(const base::PlannerTermina
         
         /* STEP1: sample random state Qa from the exisitng tree */
         Motion *nmotion = RTPtree[rng_.uniformInt(0, RTPtree.size()-1)];
-
+        
         /* STEP2: sample random state Qb (with goal biasing) */
         if ((goal_s != nullptr) && rng_.uniform01() < goalBias_ && goal_s->canSample()) {
             goal_s->sampleGoal(rstate);

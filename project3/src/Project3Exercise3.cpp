@@ -153,12 +153,12 @@ void benchmarkHome()
     tools::Benchmark::Request request(runtime_limit, memory_limit, run_count);
     tools::Benchmark b(setup, benchmark_name);
 
+    b.addPlanner(std::make_shared<geometric::RTP>(setup.getSpaceInformation()));
     b.addPlanner(std::make_shared<geometric::RRT>(setup.getSpaceInformation()));
     b.addPlanner(std::make_shared<geometric::EST>(setup.getSpaceInformation()));
     b.addPlanner(std::make_shared<geometric::PRM>(setup.getSpaceInformation()));
-    b.addPlanner(std::make_shared<geometric::RTP>(setup.getSpaceInformation()));
 
-    std::cout << "start BenchMark" << std::endl;
+    // std::cout << "start BenchMark" << std::endl;
     
     b.benchmark(request);
     b.saveResultsToFile();

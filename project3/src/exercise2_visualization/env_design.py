@@ -36,7 +36,7 @@ axes[0].plot(-5, -5, 'bo', markersize=5) # Plot the start (-5, -5)
 axes[0].plot(5.5, 5.0, 'ro', markersize=5) # Plot the goal (5.5, 5.0)
 axes[0].set_xlabel('X')
 axes[0].set_ylabel('Y')
-axes[0].set_title('Point Robot in Environment 1')
+axes[0].set_title('Environment 1')
 
 # Environment 2
 axes[1].axis('equal')
