@@ -24,6 +24,7 @@ namespace og = ompl::geometric;
 
 void planPoint(const std::vector<Rectangle> &obstacles)
 {
+    // TODO: Use your implementation of RTP to plan for a point robot.
     // construct the state space we are planning in
     auto space(std::make_shared<ob::RealVectorStateSpace>(2));
 
@@ -62,7 +63,8 @@ void planPoint(const std::vector<Rectangle> &obstacles)
 
         //save data to a txt file
         std::ofstream fout;
-        fout.open("./src/exercise2_visualization/point.txt");
+        fout.open("./src/exercise2_visualization/point_env1.txt");
+        // fout.open("./src/exercise2_visualization/point_env2.txt");
         ss.getSolutionPath().printAsMatrix(fout);
         fout.close();
     }
@@ -112,7 +114,8 @@ void planBox(const std::vector<Rectangle> &obstacles)
 
         //save data to a txt file
         std::ofstream fout;
-        fout.open("./src/exercise2_visualization/box.txt");
+        fout.open("./src/exercise2_visualization/box_env1.txt");
+        // fout.open("./src/exercise2_visualization/box_env2.txt");
         ss.getSolutionPath().printAsMatrix(fout);
         fout.close();
     }
@@ -122,10 +125,10 @@ void planBox(const std::vector<Rectangle> &obstacles)
 
 void makeEnvironment1(std::vector<Rectangle> &obstacles){
     Rectangle rect;
-    rect.x = -3;
-    rect.y = -2;
-    rect.width = 4;
-    rect.height = 1;
+    rect.x = -5;
+    rect.y = -3;
+    rect.width = 5;
+    rect.height = 2;
     obstacles.push_back(rect);
 
     rect.x = 3;
