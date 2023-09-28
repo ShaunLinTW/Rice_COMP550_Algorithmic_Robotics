@@ -30,8 +30,8 @@ void planPoint(const std::vector<Rectangle> &obstacles)
 
     // set the bounds for the R^2
     ob::RealVectorBounds bounds(2);
-    bounds.setLow(-5);
-    bounds.setHigh(5);
+    bounds.setLow(-6);
+    bounds.setHigh(6);
     space->setBounds(bounds);
 
     // define a simple setup class
@@ -40,12 +40,12 @@ void planPoint(const std::vector<Rectangle> &obstacles)
 
     // Set start and goal state
     ob::ScopedState<ob::RealVectorStateSpace> start(space);
-    start[0] = -4.5;
-    start[1] = -4.5;
+    start[0] = -5;
+    start[1] = -5;
 
     ob::ScopedState<ob::RealVectorStateSpace> goal(space);
-    goal[0] = 4.0;
-    goal[1] = 3.0;
+    goal[0] = 5.5;
+    goal[1] = 5.0;
     ss.setStartAndGoalStates(start, goal, 0.05);
 
     // set RTP as planner
@@ -63,8 +63,8 @@ void planPoint(const std::vector<Rectangle> &obstacles)
 
         //save data to a txt file
         std::ofstream fout;
-        fout.open("./src/exercise2_visualization/point_env1.txt");
-        // fout.open("./src/exercise2_visualization/point_env2.txt");
+        // fout.open("./src/exercise2_visualization/point_env1.txt");
+        fout.open("./src/exercise2_visualization/point_env2.txt");
         ss.getSolutionPath().printAsMatrix(fout);
         fout.close();
     }
@@ -79,24 +79,24 @@ void planBox(const std::vector<Rectangle> &obstacles)
 
     // set the bounds for the R^2 part of SE(2)
     ob::RealVectorBounds bounds(2);
-    bounds.setLow(-5);
-    bounds.setHigh(5);
+    bounds.setLow(-6);
+    bounds.setHigh(6);
     space->setBounds(bounds);
 
     // define a simple setup class
     og::SimpleSetup ss(space);
-    ss.setStateValidityChecker(std::bind(isValidStateSquare, std::placeholders::_1, 0.25, obstacles));
+    ss.setStateValidityChecker(std::bind(isValidStateSquare, std::placeholders::_1, 0.2, obstacles));
 
     // Set start and goal state
     ob::ScopedState<ob::SE2StateSpace> start(space);
-    start->setX(-4.5);
-    start->setY(-4.5);
-    start->setYaw(0.785);
+    start->setX(-5);
+    start->setY(-5);
+    start->setYaw(0.123);
 
     ob::ScopedState<ob::SE2StateSpace> goal(space);
-    goal->setX(4.0);
-    goal->setY(3.0);
-    goal->setYaw(2.355);
+    goal->setX(5.5);
+    goal->setY(5.0);
+    goal->setYaw(3.141);
     ss.setStartAndGoalStates(start, goal, 0.05);
 
     // set RTP as planner
@@ -114,8 +114,8 @@ void planBox(const std::vector<Rectangle> &obstacles)
 
         //save data to a txt file
         std::ofstream fout;
-        fout.open("./src/exercise2_visualization/box_env1.txt");
-        // fout.open("./src/exercise2_visualization/box_env2.txt");
+        // fout.open("./src/exercise2_visualization/box_env1.txt");
+        fout.open("./src/exercise2_visualization/box_env2.txt");
         ss.getSolutionPath().printAsMatrix(fout);
         fout.close();
     }
@@ -125,68 +125,68 @@ void planBox(const std::vector<Rectangle> &obstacles)
 
 void makeEnvironment1(std::vector<Rectangle> &obstacles){
     Rectangle rect;
-    rect.x = -5;
-    rect.y = -3;
-    rect.width = 5;
-    rect.height = 2;
+    rect.x = -4;
+    rect.y = -4;
+    rect.width = 4.5;
+    rect.height = 4;
     obstacles.push_back(rect);
 
-    rect.x = 3;
-    rect.y = 0.5;
-    rect.width = 2;
-    rect.height = 1;
+    rect.x = 2;
+    rect.y = -4;
+    rect.width = 4;
+    rect.height = 4;
     obstacles.push_back(rect);
 
-    rect.x = 1.5;
-    rect.y = 1;
-    rect.width = 1;
-    rect.height = 2;
-    obstacles.push_back(rect);
-
-    rect.x = -2;
-    rect.y = 0;
-    rect.width = 2;
+    rect.x = 2;
+    rect.y = 0.2;
+    rect.width = 3;
     rect.height = 3;
+    obstacles.push_back(rect);
+
+    rect.x = -4;
+    rect.y = 1;
+    rect.width = 3.5;
+    rect.height = 4.5;
     obstacles.push_back(rect);
 }
 
 void makeEnvironment2(std::vector<Rectangle> &obstacles)
 {
     Rectangle rect;
-    rect.x = 1;
-    rect.y = -4;
-    rect.width = 1;
-    rect.height = 4;
+    rect.x = -3.5;
+    rect.y = -3.5;
+    rect.width = 4.5;
+    rect.height = 2;
     obstacles.push_back(rect);
 
-    rect.x = -2;
-    rect.y = -5;
-    rect.width = 1;
-    rect.height = 3;
+    rect.x = 1;
+    rect.y = -6;
+    rect.width = 5;
+    rect.height = 5;
+    obstacles.push_back(rect);
+
+    rect.x = 1;
+    rect.y = -1;
+    rect.width = 6;
+    rect.height = 2;
     obstacles.push_back(rect);
 
     rect.x = 1;
     rect.y = 1;
-    rect.width = 1;
-    rect.height = 3;
-    obstacles.push_back(rect);
-
-    rect.x = 1;
-    rect.y = 0;
-    rect.width = 5;
-    rect.height = 1;
+    rect.width = 2;
+    rect.height = 4;
     obstacles.push_back(rect);
 
     rect.x = -3;
     rect.y = 2;
     rect.width = 4;
-    rect.height = 1;
+    rect.height = 3;
     obstacles.push_back(rect);
 
-    rect.x = -5;
+    rect.x = -7;
     rect.y = -0.5;
-    rect.width = 4.5;
-    rect.height = 1;
+    rect.width = 5;
+    rect.height = 1.5;
     obstacles.push_back(rect);
 }
 
