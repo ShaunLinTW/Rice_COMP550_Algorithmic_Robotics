@@ -62,7 +62,7 @@ void planPoint(const std::vector<Rectangle> &obstacles)
 
         //save data to a txt file
         std::ofstream fout;
-        fout.open("point.txt");
+        fout.open("./src/exercise2_visualization/point.txt");
         ss.getSolutionPath().printAsMatrix(fout);
         fout.close();
     }
@@ -112,7 +112,7 @@ void planBox(const std::vector<Rectangle> &obstacles)
 
         //save data to a txt file
         std::ofstream fout;
-        fout.open("box.txt");
+        fout.open("./src/exercise2_visualization/box.txt");
         ss.getSolutionPath().printAsMatrix(fout);
         fout.close();
     }

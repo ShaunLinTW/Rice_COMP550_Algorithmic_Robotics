@@ -18,8 +18,7 @@ ompl::geometric::RTP::RTP(const base::SpaceInformationPtr &si)
 
     Planner::declareParam<double>("range", this, &RTP::setRange, &RTP::getRange, "0.:1.:10000.");
     Planner::declareParam<double>("goal_bias", this, &RTP::setGoalBias, &RTP::getGoalBias, "0.:.05:1.");
-    // Planner::declareParam<bool>("intermediate_states", this, &RTP::setIntermediateStates, &RTP::getIntermediateStates,
-    //                             "0,1");
+    
 }
 
 ompl::geometric::RTP::~RTP()
@@ -41,25 +40,10 @@ void ompl::geometric::RTP::setup()
     Planner::setup();
     tools::SelfConfig sc(si_, getName());
     sc.configurePlannerRange(maxDistance_);
-
-    // if (!nn_)
-    //     nn_.reset(tools::SelfConfig::getDefaultNearestNeighbors<Motion *>(this));
-    // nn_->setDistanceFunction([this](const Motion *a, const Motion *b) { return distanceFunction(a, b); });
 }
 
 void ompl::geometric::RTP::freeMemory()
 {
-    // if (nn_)
-    // {
-    //     std::vector<Motion *> motions;
-    //     nn_->list(motions);
-    //     for (auto &motion : motions)
-    //     {
-    //         if (motion->state != nullptr)
-    //             si_->freeState(motion->state);
-    //         delete motion;
-    //     }
-    // }
     for (auto &motion : RTPtree)
     {
         if (motion->state != nullptr)
@@ -78,14 +62,8 @@ ompl::base::PlannerStatus ompl::geometric::RTP::solve(const base::PlannerTermina
     {
         auto *motion = new Motion(si_);
         si_->copyState(motion->state, st);
-        // nn_->add(motion);
+        RTPtree.push_back(motion);
     }
-
-    // if (nn_->size() == 0)
-    // {
-    //     OMPL_ERROR("%s: There are no valid initial states!", getName().c_str());
-    //     return base::PlannerStatus::INVALID_START;
-    // }
 
     if (!sampler_)
         sampler_ = si_->allocStateSampler();
@@ -104,16 +82,17 @@ ompl::base::PlannerStatus ompl::geometric::RTP::solve(const base::PlannerTermina
     
     while (!ptc)
     {
+        
         /* STEP1: sample random state Qa from the exisitng tree */
         Motion *nmotion = RTPtree[rng_.uniformInt(0, RTPtree.size()-1)];
-        std::cout << 
+
         /* STEP2: sample random state Qb (with goal biasing) */
         if ((goal_s != nullptr) && rng_.uniform01() < goalBias_ && goal_s->canSample()) {
             goal_s->sampleGoal(rstate);
         } else {
             sampler_->sampleUniform(rstate);
         }
-        
+
         /* STEP3: check if there is collision */
         if (si_->checkMotion(nmotion->state, rstate))
         {
