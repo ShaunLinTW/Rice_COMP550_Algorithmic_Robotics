@@ -1,7 +1,7 @@
 ///////////////////////////////////////
 // COMP/ELEC/MECH 450/550
 // Project 4
-// Authors: FILL ME OUT!!
+// Authors: Jason Zhang(jz118), Shaun Lin(hl116)
 //////////////////////////////////////
 
 #include <iostream>
