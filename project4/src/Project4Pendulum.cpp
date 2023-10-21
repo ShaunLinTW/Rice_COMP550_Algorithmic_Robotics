@@ -5,7 +5,7 @@
 //////////////////////////////////////
 
 #include <iostream>
-
+#include <math.h>
 #include <ompl/base/ProjectionEvaluator.h>
 
 #include <ompl/control/SimpleSetup.h>
@@ -13,6 +13,9 @@
 
 // Your implementation of RG-RRT
 #include "RG-RRT.h"
+
+namespace ob = ompl::base;
+namespace oc = ompl::control;
 
 // Your projection for the pendulum
 class PendulumProjection : public ompl::base::ProjectionEvaluator
@@ -34,17 +37,65 @@ public:
     }
 };
 
-void pendulumODE(const ompl::control::ODESolver::StateType &/* q */, const ompl::control::Control */* control */,
-                 ompl::control::ODESolver::StateType &/* qdot */)
+void pendulumODE(const ompl::control::ODESolver::StateType &q, const ompl::control::Control *c,
+                 ompl::control::ODESolver::StateType &qdot)
 {
-    // TODO: Fill in the ODE for the pendulum's dynamics
+    // Retrieve Control values: T(torque)
+    const double *u = c->as<ompl::control::RealVectorControlSpace::ControlType>()->values;
+    const double torque = u[0];
+
+    // Current rotational state
+    const double theta = q[0];
+    const double omega = q[1];
+
+    // Ensure qdot is the same size as q. TODO: is this necessary?
+    qdot.resize(q.size(), 0);
+    const int g = 9.81;
+    qdot[0] = omega; // angular velocity
+    qdot[1] = -g*cos(theta) + torque; // angular acceleration
 }
 
-ompl::control::SimpleSetupPtr createPendulum(double /* torque */)
+void pendulumPostIntegration(const bsse::State* /*state*/, const Control* /*constol*/, const double /*duration*/, ob::State* result) {
+    ompl::base::SO2StateSpace SO2;
+    // ensure orientation lies between 0 and 2*pi
+    ob::RealVectorStateSpace& s = *result->as<ob::RealVectorStateSpace>(2);
+    SO2.enforceBounds(s[0]);
+}
+
+bool isStateValid(const oc::SpaceInformation *si, const ob::State *state) {
+    //TODO: what is the reason we need to implement this function?
+    const auto *singleState = state->as<ob::RealVectorStateSpace::StateType>();
+    return si->satisfiesBounds(singleState);
+}
+
+ompl::control::SimpleSetupPtr createPendulum(double t)
 {
-    // TODO: Create and setup the pendulum's state space, control space, validity checker, everything you need for
-    // planning.
-    return nullptr;
+    // create workspace
+    auto space(std::make_shared<ob::RealVectorStateSpace>(2));
+    ob::RealVectorBounds bounds(2);
+    bounds.setHigh(0, 10);
+    bounds.setLow(0, -10);
+
+    space->setBounds(bounds);
+
+    // create control space
+    auto cspace(std::make_shared<ob::RealVectorStateSpace>(1));
+    ob::RealVectorBounds bounds(1);
+    bounds.setLow(-t);
+    bounds.setHigh(t);
+
+    cspace->setBounds(bounds);
+
+    // define setup class
+    oc::SimpleSetup ss(cspace);
+
+    // set state validity check
+    oc::SpaceInformation *si = ss.getSpaceInformation().get();
+    ss.setStateValidityChecker(
+        [si](const ob::State *state) { return isStateValid(si, state); };
+    )
+    auto odesolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &pendulumODE));
+    ss.setStatePropagator(oc::ODESolver::getStatePropagator(odesolver, &pendulumPostIntegration));
 }
 
 void planPendulum(ompl::control::SimpleSetupPtr &/* ss */, int /* choice */)
