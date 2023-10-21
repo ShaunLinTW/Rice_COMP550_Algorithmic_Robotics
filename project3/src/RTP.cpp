@@ -32,6 +32,7 @@ void ompl::geometric::RTP::clear()
     Planner::clear();
     sampler_.reset();
     freeMemory();
+    RTPtree.clear();
     
     lastGoalMotion_ = nullptr;
 }
