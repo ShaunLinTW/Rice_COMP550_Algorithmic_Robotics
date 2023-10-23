@@ -3,7 +3,7 @@
 // Project 4
 // Authors: Jason Zhang(jz118), Shaun Lin(hl116)
 //////////////////////////////////////
-
+#include <fstream>
 #include <iostream>
 #include <math.h>
 #include <ompl/base/ProjectionEvaluator.h>
@@ -14,6 +14,7 @@
 
 #include <ompl/base/spaces/SO2StateSpace.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/control/planners/kpiece/KPIECE1.h>
 
 // Your implementation of RG-RRT
 #include "RG-RRT.h"
@@ -29,19 +30,25 @@ double PI = 3.1415926;
 class PendulumProjection : public ompl::base::ProjectionEvaluator
 {
 public:
-    PendulumProjection(const ompl::base::StateSpace *space) : ProjectionEvaluator(space)
+    PendulumProjection(const ompl::base::StateSpacePtr& space) : ProjectionEvaluator(space)
     {
     }
 
     unsigned int getDimension() const override
     {
         // TODO: The dimension of your projection for the pendulum
-        return 0;
+        return 2;
     }
 
-    void project(const ompl::base::State */* state */, Eigen::Ref<Eigen::VectorXd> /* projection */) const override
+    void project(const ompl::base::State *state, Eigen::Ref<Eigen::VectorXd> projection) const override
     {
         // TODO: Your projection for the pendulum
+        auto compound_state = state->as<ob::CompoundState>();
+        auto s1 = compound_state->as<ob::SO2StateSpace::StateType>(0);
+        auto r1 = compound_state->as<ob::RealVectorStateSpace::StateType>(1);
+
+        projection(0) = s1->value;
+        projection(1) = r1->values[0];
     }
 };
 
@@ -75,8 +82,8 @@ void pendulumPostIntegration(const ob::State* /*state*/, const oc::Control* /*co
 bool isStateValid(const oc::SpaceInformation *si, const ob::State *state) {
     //TODO: what is the reason we need to implement this function?
     const auto *singleState = state->as<ob::RealVectorStateSpace::StateType>();
-    std::cout << "isStateValid: " << singleState->values[0] << " " << singleState->values[1] << std::endl;
-    std::cout << si->satisfiesBounds(singleState) << std::endl;
+    // std::cout << "isStateValid: " << singleState->values[0] << " " << singleState->values[1] << std::endl;
+    // std::cout << si->satisfiesBounds(singleState) << std::endl;
     return si->satisfiesBounds(singleState);
 }
 
@@ -104,6 +111,7 @@ ompl::control::SimpleSetupPtr createPendulum(double t)
     ob::StateSpacePtr space;
     space = s1+r1;
 
+    space->registerProjection("PendProj", ob::ProjectionEvaluatorPtr(new PendulumProjection(space)));
 
     // create control space
     auto cspace = std::make_shared<oc::RealVectorControlSpace>(space, 1);
@@ -140,13 +148,19 @@ ompl::control::SimpleSetupPtr createPendulum(double t)
 
 void planPendulum(ompl::control::SimpleSetupPtr &ss, int choice)
 {
+    std::string plannerName = "";
     if (choice == 1) {
         // set RTP as planner
         auto planner(std::make_shared<oc::RRT>(ss->getSpaceInformation()));
         ss->setPlanner(planner);
+        plannerName = "RRT";
     }
     else if (choice == 2) {
         // set KPIECE as planner
+        auto planner(std::make_shared<oc::KPIECE1>(ss->getSpaceInformation()));
+        planner->as<oc::KPIECE1>()->setProjectionEvaluator("PendProj");
+        ss->setPlanner(planner);
+        plannerName = "KPIECE";
     }
     else if (choice == 3) {
         // set RG-RRT as planner
@@ -161,14 +175,16 @@ void planPendulum(ompl::control::SimpleSetupPtr &ss, int choice)
     {
         std::cout << "Found solution:" << std::endl;
         // if ss is a ompl::geometric::SimpleSetup object
-        ss->getSolutionPath().printAsMatrix(std::cout);
+        ss->getSolutionPath().asGeometric().printAsMatrix(std::cout);
 
-        // //save data to a txt file
-        // std::ofstream fout;
-        // // fout.open("./src/exercise2_visualization/box_env1.txt");
-        // fout.open("./src/exercise2_visualization/box_env2.txt");
-        // ss.getSolutionPath().printAsMatrix(fout);
-        // fout.close();
+        //save data to a txt file
+        std::ofstream fout;
+        // fout.open("./src/exercise2_visualization/box_env1.txt");
+        std::string filename = "./src/pendulum_visualization/" + plannerName + ".txt";
+        std::cout << "Wrote to " << filename << std::endl;
+        fout.open(filename);
+        ss->getSolutionPath().asGeometric().printAsMatrix(fout);
+        fout.close();
     }
     else
         std::cout << "No solution found" << std::endl;
