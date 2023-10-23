@@ -17,6 +17,11 @@
 // Your implementation of RG-RRT
 #include "RG-RRT.h"
 
+
+namespace ob = ompl::base;
+namespace oc = ompl::control;
+namespace og = ompl::geometric;
+
 // Your projection for the car
 class CarProjection : public ompl::base::ProjectionEvaluator
 {
@@ -28,24 +33,60 @@ public:
     unsigned int getDimension() const override
     {
         // TODO: The dimension of your projection for the car
-        return 0;
+        return 2;
     }
 
-    void project(const ompl::base::State * /* state */, Eigen::Ref<Eigen::VectorXd> /* projection */) const override
+    void project(const ompl::base::State *state, Eigen::Ref<Eigen::VectorXd> projection) const override
     {
         // TODO: Your projection for the car
+        const auto *carState = state->as<ob::SE2StateSpace::StateType>();
+        projection(0) = carState->getX();
+        projection(1) = carState->getY();
     }
 };
 
-void carODE(const ompl::control::ODESolver::StateType & /* q */, const ompl::control::Control * /* control */,
+void carODE(const ompl::control::ODESolver::StateType & q, const ompl::control::Control *control,
             ompl::control::ODESolver::StateType & /* qdot */)
 {
     // TODO: Fill in the ODE for the car's dynamics
+    const double *u = control->as<ompl::control::RealVectorControlSpace::ControlType>()->values;
+    const double theta = q[2];
+    const double v = q[3];
+    qdot.resize(q.size(), 0);
+
+    qdot[0] = v * cos(theta);
+    qdot[1] = v * sin(theta);
+    qdot[2] = u[0];
+    qdot[3] = u[1];
 }
 
-void makeStreet(std::vector<Rectangle> & /* obstacles */)
+void makeStreet(std::vector<Rectangle> &obstacles)
 {
     // TODO: Fill in the vector of rectangles with your street environment.
+    Rectangle rect;
+    rect.x = -5;
+    rect.y = -4;
+    rect.width = 8;
+    rect.height = 1;
+    obstacles.push_back(rect);
+
+    rect.x = -3;
+    rect.y = -2;
+    rect.width = 7;
+    rect.height = 0.5;
+    obstacles.push_back(rect);
+
+    rect.x = -5;
+    rect.y = 0;
+    rect.width = 8;
+    rect.height = 1;
+    obstacles.push_back(rect);
+
+    rect.x = -4;
+    rect.y = 2;
+    rect.width = 7;
+    rect.height = 1.5;
+    obstacles.push_back(rect);
 }
 
 ompl::control::SimpleSetupPtr createCar(std::vector<Rectangle> & /* obstacles */)

@@ -10,12 +10,20 @@
 
 #include <ompl/control/SimpleSetup.h>
 #include <ompl/control/ODESolver.h>
+#include <ompl/control/spaces/RealVectorControlSpace.h>
+
+#include <ompl/base/spaces/SO2StateSpace.h>
+#include <ompl/base/spaces/RealVectorStateSpace.h>
 
 // Your implementation of RG-RRT
 #include "RG-RRT.h"
 
+// #define PI 3.1415926;
+
 namespace ob = ompl::base;
 namespace oc = ompl::control;
+namespace og = ompl::geometric;
+double PI = 3.1415926;
 
 // Your projection for the pendulum
 class PendulumProjection : public ompl::base::ProjectionEvaluator
@@ -37,11 +45,11 @@ public:
     }
 };
 
-void pendulumODE(const ompl::control::ODESolver::StateType &q, const ompl::control::Control *c,
-                 ompl::control::ODESolver::StateType &qdot)
+void pendulumODE(const oc::ODESolver::StateType &q, const oc::Control *c,
+                 oc::ODESolver::StateType &qdot)
 {
     // Retrieve Control values: T(torque)
-    const double *u = c->as<ompl::control::RealVectorControlSpace::ControlType>()->values;
+    const double *u = c->as<oc::RealVectorControlSpace::ControlType>()->values;
     const double torque = u[0];
 
     // Current rotational state
@@ -55,53 +63,115 @@ void pendulumODE(const ompl::control::ODESolver::StateType &q, const ompl::contr
     qdot[1] = -g*cos(theta) + torque; // angular acceleration
 }
 
-void pendulumPostIntegration(const bsse::State* /*state*/, const Control* /*constol*/, const double /*duration*/, ob::State* result) {
-    ompl::base::SO2StateSpace SO2;
+void pendulumPostIntegration(const ob::State* /*state*/, const oc::Control* /*constol*/, const double /*duration*/, ob::State* result) {
+    // ob::SO2StateSpace SO2;
     // ensure orientation lies between 0 and 2*pi
-    ob::RealVectorStateSpace& s = *result->as<ob::RealVectorStateSpace>(2);
-    SO2.enforceBounds(s[0]);
+    // auto s = *result->as<ob::SO2StateSpace::StateType>(0);
+    // TODO:enforce the values
+    // SO2.enforceBounds(s->values[0]);
+    // SO2.enforceBounds (result->as<ob::CompoundStateSpace::StateType>()->as<ob::SO2StateSpace::StateType>(0));
 }
 
 bool isStateValid(const oc::SpaceInformation *si, const ob::State *state) {
     //TODO: what is the reason we need to implement this function?
     const auto *singleState = state->as<ob::RealVectorStateSpace::StateType>();
+    std::cout << "isStateValid: " << singleState->values[0] << " " << singleState->values[1] << std::endl;
+    std::cout << si->satisfiesBounds(singleState) << std::endl;
     return si->satisfiesBounds(singleState);
 }
 
 ompl::control::SimpleSetupPtr createPendulum(double t)
 {
     // create workspace
-    auto space(std::make_shared<ob::RealVectorStateSpace>(2));
-    ob::RealVectorBounds bounds(2);
-    bounds.setHigh(0, 10);
-    bounds.setLow(0, -10);
+    // auto space = std::make_shared<ob::RealVectorStateSpace>(2);
+    // ob::RealVectorBounds bounds(2);
+    // bounds.setHigh(0, 10);
+    // bounds.setLow(0, -10);
+    // space->setBounds(bounds);
 
-    space->setBounds(bounds);
+    // construct the state space for theta
+    auto s1 = std::make_shared<ob::SO2StateSpace>();
+    
+    // construct the state space for rotational velocity
+    auto r1 = std::make_shared<ob::RealVectorStateSpace>(1);
+    
+    // set the bounds for the R^1
+    ob::RealVectorBounds r1_bounds(1);
+    r1_bounds.setLow(-10);
+    r1_bounds.setHigh(10);
+    r1->setBounds(r1_bounds);
+    
+    ob::StateSpacePtr space;
+    space = s1+r1;
+
 
     // create control space
-    auto cspace(std::make_shared<ob::RealVectorStateSpace>(1));
-    ob::RealVectorBounds bounds(1);
-    bounds.setLow(-t);
-    bounds.setHigh(t);
-
-    cspace->setBounds(bounds);
+    auto cspace = std::make_shared<oc::RealVectorControlSpace>(space, 1);
+    ob::RealVectorBounds cbounds(1);
+    cbounds.setLow(-t);
+    cbounds.setHigh(t);
+    cspace->setBounds(cbounds);
 
     // define setup class
-    oc::SimpleSetup ss(cspace);
+    oc::SimpleSetupPtr ss(new oc::SimpleSetup(cspace));
 
     // set state validity check
-    oc::SpaceInformation *si = ss.getSpaceInformation().get();
-    ss.setStateValidityChecker(
-        [si](const ob::State *state) { return isStateValid(si, state); };
-    )
-    auto odesolver(std::make_shared<oc::ODEBasicSolver<>>(ss.getSpaceInformation(), &pendulumODE));
-    ss.setStatePropagator(oc::ODESolver::getStatePropagator(odesolver, &pendulumPostIntegration));
+    oc::SpaceInformation *si = ss->getSpaceInformation().get();
+    ss->setStateValidityChecker(
+        [si](const ob::State *state) { 
+            return isStateValid(si, state); 
+        }
+    );
+    auto odesolver(std::make_shared<oc::ODEBasicSolver<>>(ss->getSpaceInformation(), &pendulumODE));
+    ss->setStatePropagator(oc::ODESolver::getStatePropagator(odesolver, &pendulumPostIntegration));
+    ss->getSpaceInformation()->setPropagationStepSize(0.05);
+
+    ob::ScopedState<ob::RealVectorStateSpace> start(space);
+    start[0] = -PI/2;
+    start[1] = 0.0;
+
+    ob::ScopedState<ob::RealVectorStateSpace> goal(space);
+    goal[0] = PI/2;
+    goal[1] = 0.0;
+    
+    ss->setStartAndGoalStates(start, goal, 0.05);
+    return ss;
 }
 
-void planPendulum(ompl::control::SimpleSetupPtr &/* ss */, int /* choice */)
+void planPendulum(ompl::control::SimpleSetupPtr &ss, int choice)
 {
-    // TODO: Do some motion planning for the pendulum
-    // choice is what planner to use.
+    if (choice == 1) {
+        // set RTP as planner
+        auto planner(std::make_shared<oc::RRT>(ss->getSpaceInformation()));
+        ss->setPlanner(planner);
+    }
+    else if (choice == 2) {
+        // set KPIECE as planner
+    }
+    else if (choice == 3) {
+        // set RG-RRT as planner
+    }
+    
+
+    // attempt to solve the problem within 1 min of planning time
+    ss->setup();
+    ob::PlannerStatus solved = ss->solve(60.0);
+
+    if (solved)
+    {
+        std::cout << "Found solution:" << std::endl;
+        // if ss is a ompl::geometric::SimpleSetup object
+        ss->getSolutionPath().printAsMatrix(std::cout);
+
+        // //save data to a txt file
+        // std::ofstream fout;
+        // // fout.open("./src/exercise2_visualization/box_env1.txt");
+        // fout.open("./src/exercise2_visualization/box_env2.txt");
+        // ss.getSolutionPath().printAsMatrix(fout);
+        // fout.close();
+    }
+    else
+        std::cout << "No solution found" << std::endl;
 }
 
 void benchmarkPendulum(ompl::control::SimpleSetupPtr &/* ss */)
