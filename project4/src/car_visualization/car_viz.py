@@ -16,7 +16,7 @@ def plot_rectangle(ax, position):
     rect = Rectangle(position[:2], position[2], position[3], fill=False)
     ax.add_patch(rect)
 
-# Create a figure with 2x2 subplots
+# Create a figure with 1x2 subplots
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 axes = axes.flatten()
 
