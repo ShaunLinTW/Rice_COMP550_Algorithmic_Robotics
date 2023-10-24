@@ -14,15 +14,15 @@ namespace ompl
 {
     namespace control
     {
-        // TODO: Implement RGRRT as described
+        // TODO: Implement RGRGRRT as described
 
-        class RRT : public base::Planner
+        class RGRRT : public base::Planner
         {
         public:
             /** \brief Constructor */
-            RRT(const SpaceInformationPtr &si);
+            RGRRT(const SpaceInformationPtr &si);
 
-            ~RRT() override;
+            ~RGRRT() override;
 
             /** \brief Continue solving for some amount of time. Return true if solution was found. */
             base::PlannerStatus solve(const base::PlannerTerminationCondition &ptc) override;

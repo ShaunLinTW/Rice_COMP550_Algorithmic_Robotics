@@ -22,11 +22,11 @@
 #include <ompl/base/spaces/SE2StateSpace.h>
 #include <ompl/control/spaces/RealVectorControlSpace.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
+#include <ompl/control/planners/rrt/RRT.h>
 #include "ompl/control/planners/kpiece/KPIECE1.h"
 #include <ompl/config.h>
 #include <valarray>
 #include <limits>
-
 
 namespace ob = ompl::base;
 namespace oc = ompl::control;
@@ -47,18 +47,20 @@ public:
         return 2;
     }
     virtual void defaultCellSizes(void) override
-    {
+    {   
+        // TODO: The cell sizes of your projection for the car
         cellSizes_.resize(2);
-        cellSizes_[0] = 0.5;
-        cellSizes_[1] = 0.5;
+        cellSizes_[0] = 0.1; // smaller cell will have more accurate projection
+        cellSizes_[1] = 0.1;
     }
 
-    void project(const ompl::base::State *state, Eigen::Ref<Eigen::VectorXd> projection) const override
+    virtual void project(const ompl::base::State *state, Eigen::Ref<Eigen::VectorXd> projection) const override
     {
         // TODO: Your projection for the car
-        const auto *carState = state->as<ob::SE2StateSpace::StateType>();
-        projection(0) = carState->getX();
-        projection(1) = carState->getY();
+        auto compound = state->as<ob::CompoundState>();
+        auto se2 = compound->as<ob::SE2StateSpace::StateType>(0);
+        projection(0) = se2->getX();
+        projection(1) = se2->getY();
     }
 };
 
@@ -84,11 +86,9 @@ void carODE(const ompl::control::ODESolver::StateType &q, const ompl::control::C
 void carPostIntegration(const ob::State *state, const oc::Control *control, const double duration, ob::State *result)
 {
     // Ensure orientation lies between 0 and 2*pi
-    // ob::SO2StateSpace SO2;
-    // auto s = result->as<ob::CompoundState>()->as<ob::SE2StateSpace::StateType>(0);
-    // SO2.enforceBounds(s->as<ob::SO2StateSpace::StateType>(1));
     ob::SO2StateSpace SO2;
-    SO2.enforceBounds(result->as<ob::CompoundState>()->as<ob::SE2StateSpace::StateType>(0));
+    auto s = result->as<ob::CompoundState>()->as<ob::SE2StateSpace::StateType>(0);
+    SO2.enforceBounds(s->as<ob::SO2StateSpace::StateType>(1));
 }
 
 bool isStateValid(const oc::SpaceInformation *si, const std::vector<Rectangle> &obstacles, const ob::State *state)
@@ -112,9 +112,9 @@ void makeStreet(std::vector<Rectangle> &obstacles)
     rect.height = 10;
     obstacles.push_back(rect);
 
-    rect.x = 2;
+    rect.x = 3;
     rect.y = -6;
-    rect.width = 9;
+    rect.width = 8;
     rect.height = 10;
     obstacles.push_back(rect);
 
@@ -122,6 +122,12 @@ void makeStreet(std::vector<Rectangle> &obstacles)
     rect.y = 8;
     rect.width = 14;
     rect.height = 3;
+    obstacles.push_back(rect);
+
+    rect.x = -1;
+    rect.y = -6;
+    rect.width = 2;
+    rect.height = 10;
     obstacles.push_back(rect);
 }
 
@@ -211,19 +217,30 @@ ompl::control::SimpleSetupPtr createCar(std::vector<Rectangle> &obstacles)
 
 void planCar(ompl::control::SimpleSetupPtr &ss, int choice)
 {
+
+    std::string plannerName = "";
     // TODO: Do some motion planning for the car
     // choice is what planner to use.
 
     if (choice == 1) {
-        // set RTP as planner
+        // set RRT as planner
         auto planner(std::make_shared<oc::RRT>(ss->getSpaceInformation()));
         ss->setPlanner(planner);
+        plannerName = "car_RRT";
     }
     else if (choice == 2) {
         // set KPIECE as planner
+        auto planner(std::make_shared<oc::KPIECE1>(ss->getSpaceInformation()));
+
+        // set the projection evaluator for KPIECE
+        auto *space = ss->getStateSpace().get();
+        space->registerProjection("CarProjection", ob::ProjectionEvaluatorPtr(new CarProjection(space)));
+        planner->as<oc::KPIECE1>()->setProjectionEvaluator("CarProjection");
+        ss->setPlanner(planner);
+        plannerName = "car_KPIECE";
     }
     else if (choice == 3) {
-        // set RG-RRT as planner
+        // TODO: set RG-RRT as planner
     }
 
     // Attempt to solve the problem within 60 second of planning time
@@ -239,7 +256,9 @@ void planCar(ompl::control::SimpleSetupPtr &ss, int choice)
 
         // save path to a txt file
         std::ofstream fout;
-        fout.open("./src/visualization/car_RRT.txt");
+        std::string filename = "./src/car_visualization/" + plannerName + ".txt";
+        std::cout << "Wrote to " << filename << std::endl;
+        fout.open(filename);
         ss->getSolutionPath().asGeometric().printAsMatrix(fout);
         fout.close();
     }

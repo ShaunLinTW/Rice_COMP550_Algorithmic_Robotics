@@ -20,14 +20,15 @@ def plot_rectangle(ax, position):
 fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 axes = axes.flatten()
 
-# Car Street Environment
+# Car Robot Environment
 axes[0].axis('equal')
 axes[0].set_xlim(-10, 10)
 axes[0].set_ylim(-10, 10)
 
 positions = [(-11, -6, 8, 10), 
-             (2, -6, 9, 10), 
-             (-7, 8, 14, 3)]
+             (3, -6, 8, 10), 
+             (-7, 8, 14, 3),
+             (-1, -6, 2, 10)]
 
 for position in positions:
     plot_rectangle(axes[0], position)
@@ -36,7 +37,7 @@ axes[0].plot(-8, -8, 'bs', markersize=8) # Plot the start (-8, -8)
 axes[0].plot(9, 9, 'rs', markersize=8) # Plot the goal (9, 9)
 axes[0].set_xlabel('South Street')
 axes[0].set_ylabel('West Street')
-axes[0].set_title('Car Street Environment')
+axes[0].set_title('Car Robot Environment')
 
 # Pendulum Environment
 axes[1].axis('equal')

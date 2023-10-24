@@ -11,22 +11,22 @@
 
 // TODO: Implement RGRRT as described
 
-ompl::control::RRT::RRT(const SpaceInformationPtr &si) : base::Planner(si, "RRT")
+ompl::control::RGRRT::RGRRT(const SpaceInformationPtr &si) : base::Planner(si, "RGRRT")
 {
     specs_.approximateSolutions = true;
     siC_ = si.get();
 
-    Planner::declareParam<double>("goal_bias", this, &RRT::setGoalBias, &RRT::getGoalBias, "0.:.05:1.");
-    Planner::declareParam<bool>("intermediate_states", this, &RRT::setIntermediateStates, &RRT::getIntermediateStates,
+    Planner::declareParam<double>("goal_bias", this, &RGRRT::setGoalBias, &RGRRT::getGoalBias, "0.:.05:1.");
+    Planner::declareParam<bool>("intermediate_states", this, &RGRRT::setIntermediateStates, &RGRRT::getIntermediateStates,
                                 "0,1");
 }
 
-ompl::control::RRT::~RRT()
+ompl::control::RGRRT::~RGRRT()
 {
     freeMemory();
 }
 
-void ompl::control::RRT::setup()
+void ompl::control::RGRRT::setup()
 {
     base::Planner::setup();
     if (!nn_)
@@ -34,7 +34,7 @@ void ompl::control::RRT::setup()
     nn_->setDistanceFunction([this](const Motion *a, const Motion *b) { return distanceFunction(a, b); });
 }
 
-void ompl::control::RRT::clear()
+void ompl::control::RGRRT::clear()
 {
     Planner::clear();
     sampler_.reset();
@@ -45,7 +45,7 @@ void ompl::control::RRT::clear()
     lastGoalMotion_ = nullptr;
 }
 
-void ompl::control::RRT::freeMemory()
+void ompl::control::RGRRT::freeMemory()
 {
     if (nn_)
     {
@@ -62,7 +62,7 @@ void ompl::control::RRT::freeMemory()
     }
 }
 
-ompl::base::PlannerStatus ompl::control::RRT::solve(const base::PlannerTerminationCondition &ptc)
+ompl::base::PlannerStatus ompl::control::RGRRT::solve(const base::PlannerTerminationCondition &ptc)
 {
     checkValidity();
     base::Goal *goal = pdef_->getGoal().get();
@@ -232,7 +232,7 @@ ompl::base::PlannerStatus ompl::control::RRT::solve(const base::PlannerTerminati
     return {solved, approximate};
 }
 
-void ompl::control::RRT::getPlannerData(base::PlannerData &data) const
+void ompl::control::RGRRT::getPlannerData(base::PlannerData &data) const
 {
     Planner::getPlannerData(data);
 
