@@ -108,6 +108,9 @@ namespace ompl
 
                 /** \brief The parent motion in the exploration tree */
                 Motion *parent{nullptr};
+
+                /** \brief Reachable set of states */
+                std::vector<Motion *> reachableSet;
             };
 
             /** \brief Free the memory allocated by this planner */
@@ -143,6 +146,10 @@ namespace ompl
 
             /** \brief The most recent goal motion.  Used for PlannerData computation */
             Motion *lastGoalMotion_{nullptr};
+
+            /** \brief The most recent motion that was attempted to be connected to a goal */
+            void setupReachableSet(Motion* const m);
+            int selectReachableMotion(const Motion* qnear, const Motion* qrand);
         };
 
     } // namespace control

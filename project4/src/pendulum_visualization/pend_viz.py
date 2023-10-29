@@ -1,11 +1,3 @@
-'''
-///////////////////////////////////////
-// COMP/ELEC/MECH 450/550
-// Project 4
-// Authors: Jason Zhang(jz118), Shaun Lin(hl116)
-//////////////////////////////////////
-'''
-
 import matplotlib.pyplot as plt
 import numpy as np
 

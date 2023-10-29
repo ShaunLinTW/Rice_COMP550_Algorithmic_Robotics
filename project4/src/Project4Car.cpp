@@ -241,6 +241,9 @@ void planCar(ompl::control::SimpleSetupPtr &ss, int choice)
     }
     else if (choice == 3) {
         // TODO: set RG-RRT as planner
+        auto planner(std::make_shared<oc::RGRRT>(ss->getSpaceInformation()));
+        ss->setPlanner(planner);
+        plannerName = "car_RG-RRT";
     }
 
     // Attempt to solve the problem within 60 second of planning time

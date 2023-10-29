@@ -16,8 +16,8 @@ def plot_rectangle(ax, position):
     rect = Rectangle(position[:2], position[2], position[3], fill=False)
     ax.add_patch(rect)
 
-# Create a figure with 1x2 subplots
-fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+# Create a figure with 1x3 subplots
+fig, axes = plt.subplots(1, 3, figsize=(12, 4))
 axes = axes.flatten()
 
 # Car Planning using RRT
@@ -40,6 +40,7 @@ axes[0].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
 axes[0].set_xlabel('South Street')
 axes[0].set_ylabel('West Street')
 axes[0].set_title('Car Planning using RRT')
+# RRT used 103655 states, and found solution in 60.011 seconds
 
 # Car Planning using KPIECE
 axes[1].axis('equal')
@@ -61,6 +62,29 @@ axes[1].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
 axes[1].set_xlabel('South Street')
 axes[1].set_ylabel('West Street')
 axes[1].set_title('Car Planning using KPIECE')
+# KPIECE used 210361 states, and found solution in 60.06 seconds
+
+# Car Planning using RG-RRT
+axes[2].axis('equal')
+axes[2].set_xlim(-10, 10)
+axes[2].set_ylim(-10, 10)
+
+positions = [(-11, -6, 8, 10),
+                (3, -6, 8, 10),
+                (-7, 8, 14, 3),
+                (-1, -6, 2, 10)]
+
+for position in positions:
+    plot_rectangle(axes[2], position)
+
+data = np.loadtxt('car_RG-RRT.txt')
+axes[2].plot(data[:, 0], data[:, 1], 'o-', markersize=2)
+axes[2].plot(-8, -8, 'bs', markersize=2) # Plot the start (-8, -8)
+axes[2].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
+axes[2].set_xlabel('South Street')
+axes[2].set_ylabel('West Street')
+axes[2].set_title('Car Planning using RG-RRT')
+# RG-RRT used 51537 states, and found solution in 60.03 seconds
 
 # Adjust spacing between subplots
 plt.tight_layout()
