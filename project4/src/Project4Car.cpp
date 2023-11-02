@@ -24,6 +24,7 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/control/planners/rrt/RRT.h>
 #include "ompl/control/planners/kpiece/KPIECE1.h"
+#include <ompl/tools/benchmark/Benchmark.h>
 #include <ompl/config.h>
 #include <valarray>
 #include <limits>
@@ -269,9 +270,42 @@ void planCar(ompl::control::SimpleSetupPtr &ss, int choice)
         std::cout << "No solution found" << std::endl;
 }
 
-void benchmarkCar(ompl::control::SimpleSetupPtr &/* ss */)
+void benchmarkCar(ompl::control::SimpleSetupPtr &ss)
 {
     // TODO: Do some benchmarking for the car
+    std::string benchmarkName = "car_benchmark";
+    double runtime_limit = 60;
+    double memory_limit = 10000.0;
+    std::string filename = "./src/car_benchmark/" + benchmarkName + ".log";
+    int run_count = 20;
+
+    // create the benchmark object and add all the planners we'd like to run
+    ompl::tools::Benchmark::Request request(runtime_limit, memory_limit, run_count);
+    ompl::tools::Benchmark b(*ss, benchmarkName);
+
+    // set up the benchmark
+    // set up a planner for RRT
+    b.addPlanner(std::make_shared<oc::RRT>(ss->getSpaceInformation()));
+
+    // set the projection evaluator for KPIECE
+    auto kpiece = std::make_shared<oc::KPIECE1>(ss->getSpaceInformation());
+    auto *space = ss->getStateSpace().get();
+
+    space->registerProjection("CarProjection", ob::ProjectionEvaluatorPtr(new CarProjection(space)));
+    kpiece->as<oc::KPIECE1>()->setProjectionEvaluator("CarProjection");
+    b.addPlanner(kpiece);
+
+    // set up a planner for RG-RRT
+    b.addPlanner(std::make_shared<oc::RGRRT>(ss->getSpaceInformation()));
+
+    // run the benchmark
+    b.benchmark(request);
+
+    // save the results
+    b.saveResultsToFile(filename.c_str());
+
+    // optionally, save a planner's output to a file
+    // b.savePlannerDataToFile(filename.c_str(), planner);
 }
 
 int main(int argc, char **argv)

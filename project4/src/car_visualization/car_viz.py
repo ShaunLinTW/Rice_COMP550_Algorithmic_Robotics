@@ -84,7 +84,7 @@ axes[2].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
 axes[2].set_xlabel('South Street')
 axes[2].set_ylabel('West Street')
 axes[2].set_title('Car Planning using RG-RRT')
-# RG-RRT used 51537 states, and found solution in 60.03 seconds
+# RG-RRT used 33931 states, and found solution in 60.03 seconds
 
 # Adjust spacing between subplots
 plt.tight_layout()
