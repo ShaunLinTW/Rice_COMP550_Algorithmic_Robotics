@@ -275,7 +275,7 @@ void benchmarkCar(ompl::control::SimpleSetupPtr &ss)
     // TODO: Do some benchmarking for the car
     std::string benchmarkName = "car_benchmark";
     double runtime_limit = 60;
-    double memory_limit = 10000.0;
+    double memory_limit = 5000.0;
     std::string filename = "./src/car_benchmark/" + benchmarkName + ".log";
     int run_count = 20;
 
@@ -289,7 +289,7 @@ void benchmarkCar(ompl::control::SimpleSetupPtr &ss)
 
     // set the projection evaluator for KPIECE
     auto kpiece = std::make_shared<oc::KPIECE1>(ss->getSpaceInformation());
-    auto *space = ss->getStateSpace().get();
+    auto space = ss->getStateSpace().get();
 
     space->registerProjection("CarProjection", ob::ProjectionEvaluatorPtr(new CarProjection(space)));
     kpiece->as<oc::KPIECE1>()->setProjectionEvaluator("CarProjection");

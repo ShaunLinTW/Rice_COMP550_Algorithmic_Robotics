@@ -12,10 +12,15 @@
 #include <ompl/control/ODESolver.h>
 #include <ompl/control/spaces/RealVectorControlSpace.h>
 
+#include <ompl/control/SpaceInformation.h>
 #include <ompl/base/spaces/SO2StateSpace.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/control/planners/rrt/RRT.h>
 #include <ompl/control/planners/kpiece/KPIECE1.h>
+#include <ompl/tools/benchmark/Benchmark.h>
+#include <ompl/config.h>
+#include <valarray>
+#include <limits>
 
 // Your implementation of RG-RRT
 #include "RG-RRT.h"
@@ -165,6 +170,9 @@ void planPendulum(ompl::control::SimpleSetupPtr &ss, int choice)
     }
     else if (choice == 3) {
         // set RG-RRT as planner
+        auto planner(std::make_shared<oc::RGRRT>(ss->getSpaceInformation()));
+        ss->setPlanner(planner);
+        plannerName = "RG-RRT";
     }
     
 
