@@ -11,6 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Polygon
 
+PI = 3.14159265358979323846
+
 # Function to plot rectangles
 def plot_rectangle(ax, position):
     rect = Rectangle(position[:2], position[2], position[3], fill=False)
@@ -33,21 +35,23 @@ positions = [(-11, -6, 8, 10),
 for position in positions:
     plot_rectangle(axes[0], position)
 
-axes[0].plot(-8, -8, 'bs', markersize=8) # Plot the start (-8, -8)
-axes[0].plot(9, 9, 'rs', markersize=8) # Plot the goal (9, 9)
+axes[0].plot(-8, -8, 'bs', markersize=7, label='start') # Plot the start (-8, -8)
+axes[0].plot(9, 9, 'rs', markersize=7, label='goal') # Plot the goal (9, 9)
+axes[0].legend(loc='best')
 axes[0].set_xlabel('South Street')
 axes[0].set_ylabel('West Street')
-axes[0].set_title('Car Robot Environment')
+axes[0].set_title('Car Environment')
 
 # Pendulum Environment
 axes[1].axis('equal')
-axes[1].set_xlim(-10, 10)
-axes[1].set_ylim(-10, 10)
+axes[1].set_xlim(-5, 5)
+axes[1].set_ylim(-5, 5)
 
-axes[1].plot(-8, 0, 'bo', markersize=5) # Plot the start (-8, 0)
-axes[1].plot(0, 0, 'ro', markersize=5) # Plot the goal (0, 0)
-axes[1].set_xlabel('θ')
-axes[1].set_ylabel('θ ̇')
+axes[1].plot(-PI/2, 0, 'bo', markersize=5, label='start') # Plot the start (-PI/2, 0)
+axes[1].plot(PI/2, 0, 'ro', markersize=5, label='goal') # Plot the goal (PI/2, 0)
+axes[1].legend(loc='upper right')
+axes[1].set_xlabel('theta')
+axes[1].set_ylabel('omega')
 axes[1].set_title('Pendulum Environment')
 
 # Adjust spacing between subplots
