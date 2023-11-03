@@ -40,7 +40,7 @@ axes[0].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
 axes[0].set_xlabel('South Street')
 axes[0].set_ylabel('West Street')
 axes[0].set_title('Car Planning using RRT')
-# RRT used 103655 states, and found solution in 60.011 seconds
+# RRT used 65754 states, and found solution in 60.05 seconds
 
 # Car Planning using KPIECE
 axes[1].axis('equal')
@@ -62,7 +62,7 @@ axes[1].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
 axes[1].set_xlabel('South Street')
 axes[1].set_ylabel('West Street')
 axes[1].set_title('Car Planning using KPIECE')
-# KPIECE used 210361 states, and found solution in 60.06 seconds
+# KPIECE used 173097 states, and found solution in 60.05 seconds
 
 # Car Planning using RG-RRT
 axes[2].axis('equal')
@@ -84,7 +84,7 @@ axes[2].plot(9, 9, 'rs', markersize=2) # Plot the goal (9, 9)
 axes[2].set_xlabel('South Street')
 axes[2].set_ylabel('West Street')
 axes[2].set_title('Car Planning using RG-RRT')
-# RG-RRT used 33931 states, and found solution in 60.03 seconds
+# RG-RRT used 32253 states, and found solution in 60.03 seconds
 
 # Adjust spacing between subplots
 plt.tight_layout()

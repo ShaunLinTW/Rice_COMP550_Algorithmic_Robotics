@@ -183,28 +183,6 @@ ompl::base::PlannerStatus ompl::control::RGRRT::solve(const base::PlannerTermina
         /* find closest state in the tree */
         Motion *nmotion = nn_->nearest(rmotion);
 
-        // // if the qrand is too far from the qnear, select a reachable motion from the reachable set of qnear that is closest to qrand
-        // while (selectReachableMotion(nmotion, rmotion)) {
-        //     // select a reachable motion from the reachable set of qnear that is closest to qrand
-        //     int id = selectReachableMotion(nmotion, rmotion);
-
-        //     // get the reachable motion
-        //     ob::State* reachable_state = nmotion->reachableSet[id];
-
-        //     // create a new motion
-        //     auto *motion = new Motion(siC_);
-        //     si_->copyState(motion->state, reachable_motion->state);
-        //     siC_->copyControl(motion->control, reachable_motion->control);
-        //     motion->steps = 1;
-        //     motion->parent = nmotion;
-
-        //     // add the motion to the tree
-        //     nn_->add(motion);
-
-        //     // update the nearest motion
-        //     nmotion = motion;
-        // }
-
         // check if there exists a state in R(qnear) that is closer to qrand than qnear. 
         // If qnear is closer to qrand than any state in R(qnear), discard qrand and repeat.
         if (!selectReachableMotion(nmotion, rmotion)) {

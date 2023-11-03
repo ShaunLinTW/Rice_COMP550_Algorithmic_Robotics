@@ -204,7 +204,7 @@ void benchmarkPendulum(ompl::control::SimpleSetupPtr &ss)
     // TODO: Do some benchmarking for the pendulum
     std::string benchmarkName = "pendulum_benchmark";
     double runtime_limit = 60;
-    double memory_limit = 5000.0;
+    double memory_limit = 10000.0;
     std::string filename = "./src/pendulum_benchmark/" + benchmarkName + ".log";
     int run_count = 20;
 

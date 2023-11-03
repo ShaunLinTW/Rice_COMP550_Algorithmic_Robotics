@@ -211,7 +211,7 @@ ompl::control::SimpleSetupPtr createCar(std::vector<Rectangle> &obstacles)
     goal[3] = 0;
 
     // Set start and goal states
-    ss->setStartAndGoalStates(start, goal, 0.05);
+    ss->setStartAndGoalStates(start, goal, 0.2);
 
     return ss;
 }
@@ -275,7 +275,7 @@ void benchmarkCar(ompl::control::SimpleSetupPtr &ss)
     // TODO: Do some benchmarking for the car
     std::string benchmarkName = "car_benchmark";
     double runtime_limit = 60;
-    double memory_limit = 5000.0;
+    double memory_limit = 10000.0;
     std::string filename = "./src/car_benchmark/" + benchmarkName + ".log";
     int run_count = 20;
 
