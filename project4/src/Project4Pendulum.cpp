@@ -199,9 +199,39 @@ void planPendulum(ompl::control::SimpleSetupPtr &ss, int choice)
         std::cout << "No solution found" << std::endl;
 }
 
-void benchmarkPendulum(ompl::control::SimpleSetupPtr &/* ss */)
+void benchmarkPendulum(ompl::control::SimpleSetupPtr &ss)
 {
     // TODO: Do some benchmarking for the pendulum
+    std::string benchmarkName = "pendulum_benchmark";
+    double runtime_limit = 60;
+    double memory_limit = 5000.0;
+    std::string filename = "./src/pendulum_benchmark/" + benchmarkName + ".log";
+    int run_count = 20;
+
+    // create the benchmark object and add all the planners we'd like to run
+    ompl::tools::Benchmark::Request request(runtime_limit, memory_limit, run_count);
+    ompl::tools::Benchmark b(*ss, benchmarkName);
+
+    // set up a planner for RG-RRT
+    b.addPlanner(std::make_shared<oc::RGRRT>(ss->getSpaceInformation()));
+    
+    // set up the benchmark
+    // set up a planner for RRT
+    b.addPlanner(std::make_shared<oc::RRT>(ss->getSpaceInformation()));
+
+    // set the projection evaluator for KPIECE
+    auto kpiece = std::make_shared<oc::KPIECE1>(ss->getSpaceInformation());
+    auto space = ss->getStateSpace();
+
+    space->registerProjection("PendProjection", ob::ProjectionEvaluatorPtr(new PendulumProjection(space)));
+    kpiece->as<oc::KPIECE1>()->setProjectionEvaluator("PendProjection");
+    b.addPlanner(kpiece);
+
+    // run the benchmark
+    b.benchmark(request);
+
+    // save the results
+    b.saveResultsToFile(filename.c_str());
 }
 
 int main(int /* argc */, char ** /* argv */)

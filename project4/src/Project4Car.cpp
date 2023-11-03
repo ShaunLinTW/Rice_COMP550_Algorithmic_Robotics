@@ -283,6 +283,9 @@ void benchmarkCar(ompl::control::SimpleSetupPtr &ss)
     ompl::tools::Benchmark::Request request(runtime_limit, memory_limit, run_count);
     ompl::tools::Benchmark b(*ss, benchmarkName);
 
+    // set up a planner for RG-RRT
+    b.addPlanner(std::make_shared<oc::RGRRT>(ss->getSpaceInformation()));
+    
     // set up the benchmark
     // set up a planner for RRT
     b.addPlanner(std::make_shared<oc::RRT>(ss->getSpaceInformation()));
@@ -294,9 +297,6 @@ void benchmarkCar(ompl::control::SimpleSetupPtr &ss)
     space->registerProjection("CarProjection", ob::ProjectionEvaluatorPtr(new CarProjection(space)));
     kpiece->as<oc::KPIECE1>()->setProjectionEvaluator("CarProjection");
     b.addPlanner(kpiece);
-
-    // set up a planner for RG-RRT
-    b.addPlanner(std::make_shared<oc::RGRRT>(ss->getSpaceInformation()));
 
     // run the benchmark
     b.benchmark(request);

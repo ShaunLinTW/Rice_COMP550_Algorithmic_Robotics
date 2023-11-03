@@ -110,7 +110,7 @@ namespace ompl
                 Motion *parent{nullptr};
 
                 /** \brief Reachable set of states */
-                std::vector<Motion *> reachableSet;
+                std::vector<base::State *> reachableSet;
             };
 
             /** \brief Free the memory allocated by this planner */

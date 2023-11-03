@@ -62,6 +62,9 @@ void ompl::control::RGRRT::freeMemory()
                 si_->freeState(motion->state);
             if (motion->control)
                 siC_->freeControl(motion->control);
+            for (auto s : motion->reachableSet) {
+                si_->freeState(s);
+            }
             delete motion;
         }
     }
@@ -85,19 +88,19 @@ void ompl::control::RGRRT::setupReachableSet(Motion* const m) {
     // Iterate 11 times to generate the reachable set
     for (size_t i = 0; i < 11; i++) 
     {
-        // Create a new motion
-        Motion *new_motion = new Motion(siC_);
-        
-        new_motion->control->as<RealVectorControlSpace::ControlType>()->values[0] = control_value;
-        new_motion->control->as<RealVectorControlSpace::ControlType>()->values[1] = 0.0;  // Second control dimension is set to 0
+        // create new control
+        Control *control = siC_->allocControl();
+
+        control->as<RealVectorControlSpace::ControlType>()->values[0] = control_value;
+        control->as<RealVectorControlSpace::ControlType>()->values[1] = 0.0;  // Second control dimension is set to 0
         
         ob::State *newState = siC_->allocState();
 
         // Propagate the state
-        siC_->propagateWhileValid(m->state, new_motion->control, 1, newState);
+        siC_->propagateWhileValid(m->state, control, 1, newState);
         
         // Add the resulting state to the reachable set
-        m->reachableSet.push_back(new_motion);
+        m->reachableSet.push_back(newState);
         
         // Update the control value for the next iteration
         control_value += step;
@@ -108,7 +111,7 @@ void ompl::control::RGRRT::setupReachableSet(Motion* const m) {
 // select a reachable motion from the reachable set of qnear that is closest to qrand
 int ompl::control::RGRRT::selectReachableMotion(const Motion* qnear, const Motion* qrand) {
     // Initialize variables to track the minimum distance and corresponding index
-    double min_D = std::numeric_limits<double>::infinity();
+    double min_D = si_->distance(qnear->state, qrand->state);
     int minIndex = -1;
 
     // Get the reachable set from qnear
@@ -117,18 +120,19 @@ int ompl::control::RGRRT::selectReachableMotion(const Motion* qnear, const Motio
     // Iterate through the reachable set of qnear
     for (int i = 0; i < reachable.size(); ++i) {
         // Calculate the distance between the current reachable motion and qrand
-        double curr_D = si_->distance(reachable[i]->state, qrand->state);
+        double curr_D = si_->distance(reachable[i], qrand->state);
 
         // If this distance is smaller than the current minimum, update minD and minIndex
         if (curr_D < min_D) {
             min_D = curr_D;
-            minIndex = i; // update the index of the motion in the reachable set that is closest to qrand
+            return true;
+            // minIndex = i; // update the index of the motion in the reachable set that is closest to qrand
         }
     }
 
     // Return the index of the motion in the reachable set that is closest to qrand
     // If no motion is closer than any other, -1 will be returned
-    return minIndex;
+    return false;
 }
 
 ompl::base::PlannerStatus ompl::control::RGRRT::solve(const base::PlannerTerminationCondition &ptc)
@@ -179,28 +183,34 @@ ompl::base::PlannerStatus ompl::control::RGRRT::solve(const base::PlannerTermina
         /* find closest state in the tree */
         Motion *nmotion = nn_->nearest(rmotion);
 
-        // if the qrand is too far from the qnear, select a reachable motion from the reachable set of qnear that is closest to qrand
-        while (selectReachableMotion(nmotion, rmotion)) {
-            // select a reachable motion from the reachable set of qnear that is closest to qrand
-            int id = selectReachableMotion(nmotion, rmotion);
+        // // if the qrand is too far from the qnear, select a reachable motion from the reachable set of qnear that is closest to qrand
+        // while (selectReachableMotion(nmotion, rmotion)) {
+        //     // select a reachable motion from the reachable set of qnear that is closest to qrand
+        //     int id = selectReachableMotion(nmotion, rmotion);
 
-            // get the reachable motion
-            Motion* reachable_motion = nmotion->reachableSet[id];
+        //     // get the reachable motion
+        //     ob::State* reachable_state = nmotion->reachableSet[id];
 
-            // create a new motion
-            auto *motion = new Motion(siC_);
-            si_->copyState(motion->state, reachable_motion->state);
-            siC_->copyControl(motion->control, reachable_motion->control);
-            motion->steps = 1;
-            motion->parent = nmotion;
+        //     // create a new motion
+        //     auto *motion = new Motion(siC_);
+        //     si_->copyState(motion->state, reachable_motion->state);
+        //     siC_->copyControl(motion->control, reachable_motion->control);
+        //     motion->steps = 1;
+        //     motion->parent = nmotion;
 
-            // add the motion to the tree
-            nn_->add(motion);
+        //     // add the motion to the tree
+        //     nn_->add(motion);
 
-            // update the nearest motion
-            nmotion = motion;
+        //     // update the nearest motion
+        //     nmotion = motion;
+        // }
+
+        // check if there exists a state in R(qnear) that is closer to qrand than qnear. 
+        // If qnear is closer to qrand than any state in R(qnear), discard qrand and repeat.
+        if (!selectReachableMotion(nmotion, rmotion)) {
+            continue;
         }
-
+        
         /* sample a random control that attempts to go towards the random state, and also sample a control duration */
         unsigned int cd = controlSampler_->sampleTo(rctrl, nmotion->control, nmotion->state, rmotion->state);
 
